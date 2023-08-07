@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Usuários</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;500&family=Montserrat:wght@300;500&family=Roboto:wght@300&family=Work+Sans&display=swap"
+        rel="stylesheet">
+    <!-- Navegador -->
+    <link rel="icon" href="imagens/ico.png" type="image/x-icon">
+    <!-- iOS -->
+    <link rel="apple-touch-icon" sizes="180x180" href="imagens/ico-ios.png">
+    <!-- Android -->
+    <link rel="icon" type="image/png" sizes="192x192" href="imagens/ico-android.png">
+</head>
+
+<!-- javascript que faz a cotação -->
+<script src="js/cotacoes.js"></script>
+
+<script>
+    // função para verificar se o usuário está autenticado
+    function checkAuthentication() {
+        // verifica se existe um token ou informação de autenticação no armazenamento local (sessionStorage )
+        const authenticated = sessionStorage.getItem('userAuthenticated');
+
+        if (!authenticated) {
+            window.location.href = 'index.html';
+        }
+    }
+
+    checkAuthentication();
+</script>
+
+<script>
+    // função que busca as condições climáticas pela sua localização
+    function getWeather() {
+        // verifica se o navegador suporta geolocalização
+        if ("geolocation" in navigator) {
+            // captura a localização atual do usuário
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                // chamada na API
+                const apiKey = "4fdc2d1f206e6df2de3bdfdc7bef0ab7";
+                const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric&lang=pt_br`;
+
+                fetch(apiUrl)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        // armazenando os dados climáticos
+                        //const weatherDescription = data.weather[0].description;
+                        const temperature = Math.round(data.main.temp); // arredondando a temperatura
+                        const cityName = data.name;
+                        const weatherIcon = `https://openweathermap.org/img/w/${data.weather[0].icon}.png`;
+
+                        const weatherInfo = document.createElement("div");
+                        weatherInfo.innerHTML =
+                            `<div class="clima displayFlex">
+                            <p>${cityName}</p>
+                            <p class="marginLR">-</p>
+                            <p class="marginR">${temperature}°C</p>
+                            <img src="${weatherIcon}" alt="Condição climática">
+                            </div>`;
+                        document.getElementById("userList").appendChild(weatherInfo);
+                    })
+                    .catch((error) => {
+                        console.error("erro ao obter informações climáticas:", error);
+                    });
+            });
+        } else {
+            console.error("geolocalização não suportada pelo navegador.");
+        }
+    }
+    getWeather();
+</script>
+
+<body>
+    <div class="main">
+        <div class="titleBox">
+            <h1 class="title">Vendemmia</h1>
+        </div>
+        <div class="divSair">
+            <h2 id="botaoSair" class="botaoSair">Sair</h2>
+        </div>
+
+        <div class="box">
+            <h1>Listagem de Usuários</h1>
+            <div id="userList" class="lista">
+                <!-- os dados dos usuários aparecerão aqui pelo JavaScript -->
+            </div>
+        </div>
+        <div id="cotacaoBox"></div>
+    </div>
+
+    <!-- javascript que faz a listagem dos usuários -->
+    <script src="js/lista_usuarios.js"></script>
+    
+</body>
+
+</html>
